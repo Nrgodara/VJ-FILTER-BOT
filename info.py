@@ -163,7 +163,7 @@ LOG_STR += (f"MAX_LIST_ELM Found, long list will be shortened to first {MAX_LIST
 LOG_STR += f"Your current IMDB template is {IMDB_TEMPLATE}"
 
 
-STICKERS = [
+STICKER = [
     "CAACAgUAAxkBAAIpbGb9EtaGBYiLtECtpLbZVYXTDC3JAAKeDwACpHAAAVf5ZwMX0VcfYjQE",
     "CAACAgUAAxkBAAIpbmb9Gox798snIjfZXwcQoO31eEZcAAIUDwAC-PQAAVcMgICO3MnB3DQE",
     "CAACAgUAAxkBAAIpcWb9GpQEGE4gXPZuOumTU8szu8OUAAL1DQAC3joAAVeu4IbJecjj8jQE",
