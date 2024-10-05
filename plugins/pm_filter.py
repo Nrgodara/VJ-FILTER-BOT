@@ -39,6 +39,9 @@ async def auto_react(client, message):
     except Exception as e:
         logger.error(f"Error in auto_react: {e}")
         pass
+    finally:
+        # Do nothing that stops the message from being processed by other handlers
+        return
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
