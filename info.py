@@ -175,7 +175,7 @@ STICKER = [
 ]
 
 #start_command_reactions
-REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🥰", "🤩", "👏", "😛", "🎉", "⚡️", "🔥", "🆒", "😁"] 
+REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🥰", "❤️", "👏", "🔥", "🎉", "⚡️", "🆒", "😁"] 
 
 # Don't Remove Credit 
 # Subscribe YouTube Channel For Amazing Bot @MR_MAHIJI
