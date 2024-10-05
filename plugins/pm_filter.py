@@ -31,12 +31,17 @@ BUTTONS1 = {}
 BUTTONS2 = {}
 SPELL_CHECK = {}
 
-@Client.on_message(filters.group & filters.text & filters.incoming)
-async def give_filter(client, message):
+
+@Client.on_message(filters.incoming)
+async def auto_react(client, message):
     try:
         await message.react(emoji=random.choice(REACTIONS))
-    except :
+    except Exception as e:
+        logger.error(f"Error in auto_react: {e}")
         pass
+
+@Client.on_message(filters.group & filters.text & filters.incoming)
+async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
         content = message.text
         settings = await get_settings(message.chat.id)
@@ -80,10 +85,6 @@ async def give_filter(client, message):
 
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
-    try:
-        await message.react(emoji=random.choice(REACTIONS))
-    except :
-        pass
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
