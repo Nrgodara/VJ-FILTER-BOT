@@ -1076,39 +1076,73 @@ async def save_template(client, message):
     await sts.edit(f"Successfully changed template for {title} to\n\n{template}")
 
 
-@Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")) & filters.group)
+@Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")))
 async def requests(bot, message):
-    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None: return # Must add REQST_CHANNEL and SUPPORT_CHAT_ID to use this feature
+    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None: 
+        return  # Ensure that REQST_CHANNEL and SUPPORT_CHAT_ID are defined
+
+    chat_id = message.chat.id
+    reporter = str(message.from_user.id)
+    mention = message.from_user.mention
+    success = False  # Initialize success flag
+
+    # Check if the message is a reply or a standalone
     if message.reply_to_message:
-        chat_id = message.chat.id
-        reporter = str(message.from_user.id)
-        mention = message.from_user.mention
-        success = True
+        # Case 1: If the message is a reply
         content = message.reply_to_message.text
-        try:
-            if REQST_CHANNEL is not None:
+    else:
+        # Case 2: If the message is not a reply, get the command's argument (i.e., the text after 'request')
+        content = message.text
+        keywords = ["/request", "#request", "/Request", "#Request"]
+        for keyword in keywords:
+            if keyword in content:
+                content = content.replace(keyword, "").strip()  # Remove the command keyword to get the actual content
+
+    # Check if the content is valid (at least 3 characters)
+    if len(content) < 3:
+        await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
+        return  # Stop further execution if content is invalid
+
+    # Process the request and send to REQST_CHANNEL or ADMINS
+    try:
+        if REQST_CHANNEL is not None:
+            # Prepare the button with the message link
+            btn = [[
+                InlineKeyboardButton('View Request', url=f"{message.link}"),
+                InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
+            ]]
+            # Send the request to REQST_CHANNEL
+            reported_post = await bot.send_message(
+                chat_id=REQST_CHANNEL,
+                text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            success = True
+        else:
+            # If REQST_CHANNEL is not set, send to admins
+            for admin in ADMINS:
                 btn = [[
-                        InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
-                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                      ]]
-                reported_post = await bot.send_message(chat_id=REQST_CHANNEL, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
+                    InlineKeyboardButton('View Request', url=f"{message.link}"),
+                    InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
+                ]]
+                reported_post = await bot.send_message(
+                    chat_id=admin,
+                    text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", 
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
                 success = True
-            elif len(content) >= 3:
-                for admin in ADMINS:
-                    btn = [[
-                        InlineKeyboardButton('View Request', url=f"{message.reply_to_message.link}"),
-                        InlineKeyboardButton('Show Options', callback_data=f'show_option#{reporter}')
-                      ]]
-                    reported_post = await bot.send_message(chat_id=admin, text=f"<b>𝖱𝖾𝗉𝗈𝗋𝗍𝖾𝗋 : {mention} ({reporter})\n\n𝖬𝖾𝗌𝗌𝖺𝗀𝖾 : {content}</b>", reply_markup=InlineKeyboardMarkup(btn))
-                    success = True
-            else:
-                if len(content) < 3:
-                    await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
-            if len(content) < 3:
-                success = False
-        except Exception as e:
-            await message.reply_text(f"Error: {e}")
-            pass
+    except Exception as e:
+        await message.reply_text(f"Error: {e}")
+        return
+
+    # If the request was successfully processed, send a confirmation to the user
+    if success:
+        link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
+        btn = [[
+            InlineKeyboardButton('Join Channel', url=link.invite_link),
+            InlineKeyboardButton('View Request', url=f"{reported_post.link}")
+        ]]
+        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
         
     elif SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
