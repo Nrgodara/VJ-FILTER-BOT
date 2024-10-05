@@ -77,6 +77,7 @@ async def give_filter(client, message):
 
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
+    await message.react(emoji=random.choice(REACTIONS))
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
@@ -1088,7 +1089,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.message.edit_text(text=new_text)
             return
         else:
-            new_text= "**🤣 you already used free now no more free trail. please buy subscription here are our 👉 /plans**"
+            new_text= "**Don't be Oversamrt 🤣\n you already used free now no more free trial available. \n\nplease buy subscription here are our 👉 /plans**"
             await query.message.edit_text(text=new_text)
             return
             
@@ -1410,7 +1411,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await query.answer("Kindly Join Given Channel Then Click On Unmute Button", show_alert=True)
             else:
                 await client.unban_chat_member(query.message.chat.id, user_id)
-                await query.answer("Unmuted Successfully !", show_alert=True)
+                await query.answer("✅ Unmuted Successfully ✅ ", show_alert=True)
                 try:
                     await query.message.delete()
                 except:
@@ -1861,7 +1862,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                  InlineKeyboardButton('Jᴏɪɴ Cʜᴀɴɴᴇʟ', url=link.invite_link),
                  InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
                ],[
-                 InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/vj_bots")
+                 InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/+KzbVzahVdqQ3MmM1")
                ]]
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
@@ -2047,29 +2048,35 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+
+#InlineKeyboardButton('ʏᴛ-ᴅʟ', callback_data='ytdl'), 
+            # InlineKeyboardButton('ꜱᴏɴɢ', callback_data='song'),
+             #InlineKeyboardButton('ᴛᴇʟᴇɢʀᴀᴘʜ', callback_data='tele') 
+        # ], [
+            # InlineKeyboardButton('ꜱᴛɪᴄᴋᴇʀ-ɪᴅ', callback_data='sticker'),
+           #  InlineKeyboardButton('ᴊ-ꜱᴏɴ', callback_data='json')
+         #], [             
+
+    
+    # InlineKeyboardButton('ʀᴇɴᴀᴍᴇ', callback_data='r_txt'),   
+           #  InlineKeyboardButton('sᴛʀᴇᴀᴍ/ᴅᴏᴡɴʟᴏᴀᴅ', callback_data='s_txt') 
+       #  ], [ 
+
+    
     
     elif query.data == "help":
         buttons = [[
              InlineKeyboardButton('⚙️ ᴀᴅᴍɪɴ ᴏɴʟʏ 🔧', callback_data='admin'),
          ], [ 
-             InlineKeyboardButton('ʀᴇɴᴀᴍᴇ', callback_data='r_txt'),   
-             InlineKeyboardButton('sᴛʀᴇᴀᴍ/ᴅᴏᴡɴʟᴏᴀᴅ', callback_data='s_txt') 
-         ], [ 
              InlineKeyboardButton('ꜰɪʟᴇ ꜱᴛᴏʀᴇ', callback_data='store_file'),   
-             InlineKeyboardButton('ᴛᴇʟᴇɢʀᴀᴘʜ', callback_data='tele') 
+             InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data='shortlink_info')
          ], [ 
              InlineKeyboardButton('ᴄᴏɴɴᴇᴄᴛɪᴏɴꜱ', callback_data='coct'), 
              InlineKeyboardButton('ꜰɪʟᴛᴇʀꜱ', callback_data='filters')
          ], [
-             InlineKeyboardButton('ʏᴛ-ᴅʟ', callback_data='ytdl'), 
+             InlineKeyboardButton('sᴛᴀᴛs', callback_data='stats')
              InlineKeyboardButton('ꜱʜᴀʀᴇ ᴛᴇxᴛ', callback_data='share')
          ], [
-             InlineKeyboardButton('ꜱᴏɴɢ', callback_data='song'),
-             InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data='shortlink_info')
-         ], [
-             InlineKeyboardButton('ꜱᴛɪᴄᴋᴇʀ-ɪᴅ', callback_data='sticker'),
-             InlineKeyboardButton('ᴊ-ꜱᴏɴ', callback_data='json')
-         ], [             
              InlineKeyboardButton('🏠 𝙷𝙾𝙼𝙴 🏠', callback_data='start')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -2086,7 +2093,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "about":
         buttons = [[
             InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
-            InlineKeyboardButton('Sᴏᴜʀᴄᴇ Cᴏᴅᴇ', url="https://github.com/VJBots/VJ-FILTER-BOT")
+            InlineKeyboardButton('Sᴏᴜʀᴄᴇ Cᴏᴅᴇ', user_id=admin")
         ],[
             InlineKeyboardButton('Hᴏᴍᴇ', callback_data='start'),
             InlineKeyboardButton('Cʟᴏsᴇ', callback_data='close_data')
