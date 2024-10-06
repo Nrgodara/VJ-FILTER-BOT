@@ -31,18 +31,6 @@ BUTTONS1 = {}
 BUTTONS2 = {}
 SPELL_CHECK = {}
 
-
-@Client.on_message(filters.incoming)
-async def auto_react(client, message):
-    try:
-        await message.react(emoji=random.choice(REACTIONS))
-    except Exception as e:
-        logger.error(f"Error in auto_react: {e}")
-        pass
-    finally:
-        # Do nothing that stops the message from being processed by other handlers
-        return
-
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
