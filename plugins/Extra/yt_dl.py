@@ -27,6 +27,9 @@ async def song(client, message):
     print(query)
     m = await message.reply(f"**ѕєαrchíng чσur ѕσng...!\n {query}**")
     #ydl_opts = {"format": "bestaudio[ext=m4a]"}
+    if not os.path.exists("cookies.txt"):
+    return await m.edit("Cookies file not found. Please make sure cookies.txt is in the correct location.")
+    
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",
         "cookies": "cookies.txt"  # Path to your cookies file
@@ -54,6 +57,13 @@ async def song(client, message):
             info_dict = ydl.extract_info(link, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
+    except Exception as e:
+        await message.reply(f"str(e)\n {e}")
+        if "cookies" in str(e).lower():
+            return await m.edit("Cookies may have expired or are invalid. Please update your cookies file.")
+        
+            
+  
 
         cap = f"<b>{title}</b>\n\n𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒅 𝑩𝒚 ➤ [{temp.B_NAME}](https://t.me/{temp.U_NAME})\n𝑹𝒆𝒒𝒖𝒆𝒔𝒕𝒆𝒅 𝑩𝒚 ➤ {rpk} 🥀"
         secmul, dur, dur_arr = 1, 0, duration.split(':')
