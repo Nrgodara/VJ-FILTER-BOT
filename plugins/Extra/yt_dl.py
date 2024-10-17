@@ -27,12 +27,20 @@ async def song(client, message):
     print(query)
     m = await message.reply(f"**ѕєαrchíng чσur ѕσng...!\n {query}**")
     #ydl_opts = {"format": "bestaudio[ext=m4a]"}
-    if not os.path.exists("cookies.txt"):
-        return await m.edit("Cookies file not found. Please make sure cookies.txt is in the correct location.")
+    # Construct the cookies file path in the home directory
+    cookies_path = os.path.expanduser("~/cookies.txt")
     
+    # Check if the cookies file exists
+    if not os.path.exists(cookies_path):
+        return await m.edit("Cookies file not found in the home directory. Please place `cookies.txt` in your home folder.")
+
+    # yt-dlp options
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",
-        "cookies": "cookies.txt"  # Path to your cookies file
+        "cookies": cookies_path,  # Use cookies from the home directory
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",  # Act as a browser
+        "geo_bypass": True,
+        "nocheckcertificate": True,  # Bypass SSL certificate issues
     }
         
     try:
