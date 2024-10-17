@@ -134,38 +134,26 @@ async def vsong(client, message: Message):
             kekme = f"https://img.youtube.com/vi/{fridayz}/hqdefault.jpg"
             sedlyf = wget.download(kekme)
 
-        opts = {
-            "format": "best",
-            "addmetadata": True,
-            "key": "FFmpegMetadata",
-            "prefer_ffmpeg": True,
-            "cookies": "cookies.txt",
-            "geo_bypass": True,
-            "nocheckcertificate": True,
-            "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-            "outtmpl": "%(id)s.mp4",
-            "logtostderr": False,
-            "quiet": False,  # Set quiet to False to print error messages
+        ydl_opts = {
+            'outtmpl': 'downloaded_video_%(id)s.%(ext)s',
+            'progress_hooks': [lambda d: print(d['status'])],
+            'cookiefile': 'cookies.txt'
         }
+
 
         
 
-        with YoutubeDL(opts) as ytdl:
-            ytdl_data = ytdl.extract_info(url, download=True)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+            title = info_dict.get('title', None)
 
-        file_stark = f"{ytdl_data['id']}.mp4"
-        capy = f"""**TITLE :**{ytdl_data['title']}\n**𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒅 𝑩𝒚 ➤ [{temp.B_NAME}](https://t.me/{temp.U_NAME})\n𝑹𝒆𝒒𝒖𝒆𝒔𝒕𝒆𝒅 𝑩𝒚 ➤** {message.from_user.mention}"""
+            if title:
+                ydl.download([url])
+                uploading_msg = await message.reply_text("Uploading video...")
+                video_filename = f"downloaded_video_{info_dict['id']}.mp4"
+                sent_message = await client.send_video(message.chat.id, video=open(video_filename, 'rb'), caption=title)
 
-        # Send video to the user
-        await client.send_video(
-            message.chat.id,
-            video=open(file_stark, "rb"),
-            duration=int(ytdl_data["duration"]),
-            file_name=str(ytdl_data["title"]),
-            thumb=sedlyf if 'sedlyf' in locals() else None,
-            caption=capy,
-            supports_streaming=True,
-        )
+                
         await pablo.delete()
 
         # Send video to the log channel
