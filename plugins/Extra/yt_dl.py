@@ -129,7 +129,7 @@ async def vsong(client, message: Message):
             "addmetadata": True,
             "key": "FFmpegMetadata",
             "prefer_ffmpeg": True,
-            "cookies": "cookies.txt"
+            "cookies": "cookies.txt",
             "geo_bypass": True,
             "nocheckcertificate": True,
             "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
