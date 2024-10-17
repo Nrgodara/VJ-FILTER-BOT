@@ -16,95 +16,88 @@ from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
 
 
-@Client.on_message(filters.command(['song', 'mp3']))
+import logging
+
+# Configure logging
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+
+@Client.on_message(filters.command(['song', 'mp3'])) 
 async def song(client, message):
-    user_id = message.from_user.id
-    user_name = message.from_user.first_name
-    rpk = "["+user_name+"](tg://user?id="+str(user_id)+")"
+    user_id = message.from_user.id 
+    user_name = message.from_user.first_name 
     query = ' '.join(message.command[1:])
 
-    print(f"Query: {query}")
-    m = await message.reply(f"**ѕєαrchíng чσur ѕσng...!\n {query}**")
-
-    # Construct the cookies file path in the home directory
-    cookies_path = os.path.expanduser("~/cookies.txt")
+    logging.info(f"Query: {query}")
     
-    # Check if the cookies file exists
-    if not os.path.exists(cookies_path):
-        return await m.edit("Cookies file not found in the home directory. Please place `cookies.txt` in your home folder.")
+    m = await message.reply(f"**Searching for your song...!**")
 
-    # yt-dlp options for both searching and downloading
+    if not os.path.exists("cookies.txt"):
+        return await m.edit("Cookies file not found. Please ensure cookies.txt is in the correct location.")
+    
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",
-        "cookies": cookies_path,  # Use cookies from the home directory
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",  # Act as a browser
+        "cookies": "cookies.txt",  # Path to your cookies file
+        "default_search": "ytsearch1",  # To search YouTube by name
+        "noplaylist": True,  # Disable playlists
         "geo_bypass": True,
-        "nocheckcertificate": True,  # Bypass SSL certificate issues
-        "quiet": True,  # Suppress unnecessary output
-        "default_search": "ytsearch1",  # Perform a YouTube search for the query and get the first result
     }
 
-    await m.edit("🎶🌹🎶\n**dσwnlσαdíng чσur ѕσng...!**")
+    try:
+        logging.info("Performing YouTube search")
+        results = YoutubeSearch(query, max_results=1).to_dict()
+        link = f"https://youtube.com{results[0]['url_suffix']}"
+        title = results[0]["title"][:40]       
+        thumbnail = results[0]["thumbnails"][0]
+        thumb_name = f'thumb{title}.jpg'
+        thumb = requests.get(thumbnail, allow_redirects=True)
+        open(thumb_name, 'wb').write(thumb.content)
+        duration = results[0]["duration"]
+        logging.info(f"Found video: {title} | {link}")
+
+    except Exception as e:
+        logging.error(f"Error during search: {e}")
+        return await m.edit(f"**Could not find the song. Please try again with a different query.**\n\nError: {str(e)}")
+
+    await m.edit("🎶🌹🎶\n**Downloading your song...!**")
 
     try:
         with YoutubeDL(ydl_opts) as ydl:
-            # Use yt-dlp to search and download the best matching result
-            info_dict = ydl.extract_info(query, download=False)
-            link = info_dict.get("webpage_url")
-            title = info_dict.get("title")[:40]
-            thumbnail = info_dict.get("thumbnail")
-            performer = f"MAHI®🇮🇳"
-            duration = info_dict.get("duration")
-
-            # Download the thumbnail
-            thumb_name = f'thumb_{title}.jpg'
-            thumb = requests.get(thumbnail, allow_redirects=True)
-            with open(thumb_name, 'wb') as thumb_file:
-                thumb_file.write(thumb.content)
-
-            # Download the audio file
+            logging.info("Attempting to download the audio")
+            info_dict = ydl.extract_info(link, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
 
-    except Exception as e:
-        print(f"Error during song processing: {e}")
-        return await m.edit(f"An error occurred: {str(e)}")
-
-    try:
-        # Prepare caption and audio duration
-        cap = f"<b>{title}</b>\n\n𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅𝒆𝒅 𝑩𝒚 ➤ [{temp.B_NAME}](https://t.me/{temp.U_NAME})\n𝑹𝒆𝒒𝒖𝒆𝒔𝒕𝒆𝒅 𝑩𝒚 ➤ {rpk} 🥀"
+        cap = f"<b>{title}</b>\n\nRequested By: [{user_name}](tg://user?id={user_id})"
         await message.reply_audio(
             audio_file,
             caption=cap,
             quote=False,
             title=title,
-            duration=duration,
-            performer=performer,
-            thumb=thumb_name
-        )
-
-        # Log the downloaded audio in the channel
-        await client.send_audio(
-            chat_id=LOG_CHANNEL,
-            audio=audio_file,
-            caption=f"Downloaded song by [{user_name}](tg://user?id={user_id})\n\n{cap}",
-            title=title,
-            duration=duration,
-            performer=performer,
+            duration=int(duration.split(':')[0]) * 60 + int(duration.split(':')[1]),
+            performer="MAHI®",
             thumb=thumb_name
         )
         await m.delete()
 
     except Exception as e:
-        await m.edit(f"An error occurred while sending the song: {str(e)}")
-        print(f"Error while sending audio: {e}")
+        logging.error(f"Error during download: {e}")
+        if "cookies" in str(e).lower():
+            return await m.edit("Cookies may have expired or are invalid. Please update your cookies file.")
+        await m.edit(f"Error during download: {str(e)}")
 
-    # Cleanup
-    try:
-        os.remove(audio_file)
-        os.remove(thumb_name)
-    except Exception as e:
-        print(f"Cleanup error: {e}")
+    finally:
+        try:
+            if os.path.exists(audio_file):
+                os.remove(audio_file)
+            if os.path.exists(thumb_name):
+                os.remove(thumb_name)
+        except Exception as e:
+            logging.error(f"Error during file cleanup: {e}")
+            
+
         
 
 def get_text(message: Message) -> [None,str]:
