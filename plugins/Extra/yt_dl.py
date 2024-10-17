@@ -28,7 +28,7 @@ async def song(client, message):
     m = await message.reply(f"**ѕєαrchíng чσur ѕσng...!\n {query}**")
     #ydl_opts = {"format": "bestaudio[ext=m4a]"}
     if not os.path.exists("cookies.txt"):
-    return await m.edit("Cookies file not found. Please make sure cookies.txt is in the correct location.")
+        return await m.edit("Cookies file not found. Please make sure cookies.txt is in the correct location.")
     
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",
@@ -58,7 +58,7 @@ async def song(client, message):
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
     except Exception as e:
-        await message.reply(f"str(e)\n {e}")
+        await message.reply(f"An error occurred: {str(e)}")
         if "cookies" in str(e).lower():
             return await m.edit("Cookies may have expired or are invalid. Please update your cookies file.")
         
