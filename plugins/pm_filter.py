@@ -1090,10 +1090,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             new_text= "**Don't be Oversamrt 🤣\n you already used free now no more free trial available. \n\nplease buy subscription here are our 👉 /plans**"
             await query.message.edit_text(text=new_text)
             return
-    elif query.data == "confirm_delete_":
+    elif query.data.startswith("confirm_delete_"):
         try:
-            # Extract the size limit from the callback data
-            size_limit_bytes = int(data.split("_")[2])
+            # Extract the size limit in bytes from the callback data
+            size_limit_bytes = int(query.data.split("_")[2])
 
             # Proceed with deletion
             result = await Media.collection.delete_many({
@@ -1101,19 +1101,23 @@ async def cb_handler(client: Client, query: CallbackQuery):
             })
 
             if result.deleted_count:
-                await query.message.edit(f'Successfully deleted {result.deleted_count} files smaller than {size_limit_bytes // (1024 * 1024)} MB from the database.')
+                await query.message.edit(f'✅ Successfully deleted {result.deleted_count} files smaller than {size_limit_bytes // (1024 * 1024)} MB from the database.')
             else:
                 await query.message.edit('No files were deleted.')
+        
         except Exception as e:
-            await query.message.edit(f"An error occurred: {str(e)}")
+            # Handle any errors that occur during the deletion process
+            await query.message.edit(f"An error occurred during deletion: {str(e)}")
             return
-    
     elif query.data == "cancel_delete":
-        await query.message.edit("Deletion process canceled.")
-        return
- 
-
-    
+        try:
+            # User chose to cancel the deletion
+            await query.message.edit("❌ Deletion process canceled.")
+        
+        except Exception as e:
+            # Handle any errors that occur during the cancelation process
+            await query.message.edit(f"An error occurred while canceling: {str(e)}")
+            return
     elif query.data == "buy_premium":
         btn = [[            
             InlineKeyboardButton("✅sᴇɴᴅ ʏᴏᴜʀ ᴘᴀʏᴍᴇɴᴛ ʀᴇᴄᴇɪᴘᴛ ʜᴇʀᴇ✅", user_id=admin)
