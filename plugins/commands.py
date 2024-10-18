@@ -1125,13 +1125,22 @@ async def requests(bot, message):
     success = False  # Initialize success flag
 
     try:
+        # Debugging: Print whether this is a reply or not
+        print(f"Message ID: {message.message_id} - Is this a reply? {'Yes' if message.reply_to_message else 'No'}")
+
         # Check if the message is a reply or a standalone command
         if message.reply_to_message:
-            # Case 1: If the message is a reply, ensure it has text
+            # Case 1: If the message is a reply, handle both text and media with caption
             if message.reply_to_message.text:
                 content = message.reply_to_message.text
+                print(f"Message is a reply with text: {content}")
+            elif message.reply_to_message.caption:
+                content = message.reply_to_message.caption
+                print(f"Message is a reply with a caption: {content}")
             else:
-                await message.reply_text("<b>The message you're replying to does not contain any text. Please reply to a text message.</b>")
+                # Replied message has no text or caption
+                await message.reply_text("<b>The message you're replying to does not contain any text or caption. Please reply to a text or captioned message.</b>")
+                print("Reply is invalid - No text or caption")
                 return
         else:
             # Case 2: If the message is not a reply, get the command's argument (i.e., the text after 'request')
@@ -1140,10 +1149,12 @@ async def requests(bot, message):
             for keyword in keywords:
                 if keyword in content:
                     content = content.replace(keyword, "").strip()  # Remove the command keyword to get the actual content
+            print(f"Standalone request content: {content}")
 
         # Check if the content is valid (at least 3 characters)
         if len(content) < 3:
-            await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
+            await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>\n\n Eg:- <pre>/request Vicky Vidya Ka Woh Wala Video 2024</pre>")
+            print(f"Invalid content: {content} - Too short")
             return  # Stop further execution if content is invalid
 
         # Process the request and send to REQST_CHANNEL or ADMINS
@@ -1160,6 +1171,7 @@ async def requests(bot, message):
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             success = True
+            print(f"Request sent to REQST_CHANNEL: {REQST_CHANNEL}")
         else:
             # If REQST_CHANNEL is not set, send to admins
             for admin in ADMINS:
@@ -1173,6 +1185,7 @@ async def requests(bot, message):
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
                 success = True
+                print(f"Request sent to admin: {admin}")
 
     except Exception as e:
         # If any error occurs, reply with the error and print the stack trace for logging
@@ -1190,10 +1203,12 @@ async def requests(bot, message):
                 InlineKeyboardButton('View Request', url=f"{reported_post.link}")
             ]]
             await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
+            print("Confirmation message sent to the user.")
         except Exception as e:
             # Handle any errors while creating the invite link
             await message.reply_text(f"<b>An error occurred while creating the invite link: {str(e)}</b>")
             print(f"Error while creating invite link: {traceback.format_exc()}")
+
 
      
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
