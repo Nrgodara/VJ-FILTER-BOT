@@ -1195,7 +1195,7 @@ async def requests(bot, message):
             await message.reply_text(f"<b>An error occurred while creating the invite link: {str(e)}</b>")
             print(f"Error while creating invite link: {traceback.format_exc()}")
 
-  '''  elif SUPPORT_CHAT_ID == message.chat.id:
+     elif SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
         reporter = str(message.from_user.id)
         mention = message.from_user.mention
@@ -1239,7 +1239,7 @@ async def requests(bot, message):
                 InlineKeyboardButton('Join Channel', url=link.invite_link),
                 InlineKeyboardButton('View Request', url=f"{reported_post.link}")
               ]]
-        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))'''
+        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
     
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):
