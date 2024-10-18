@@ -1119,33 +1119,34 @@ async def save_template(client, message):
 
 @Client.on_message((filters.command(["request", "Request"]) | filters.regex("#request") | filters.regex("#Request")))
 async def requests(bot, message):
-    if REQST_CHANNEL is None or SUPPORT_CHAT_ID is None: 
-        return  # Ensure that REQST_CHANNEL and SUPPORT_CHAT_ID are defined
-
     chat_id = message.chat.id
     reporter = str(message.from_user.id)
     mention = message.from_user.mention
     success = False  # Initialize success flag
 
-    # Check if the message is a reply or a standalone
-    if message.reply_to_message:
-        # Case 1: If the message is a reply
-        content = message.reply_to_message.text
-    else:
-        # Case 2: If the message is not a reply, get the command's argument (i.e., the text after 'request')
-        content = message.text
-        keywords = ["/request", "#request", "/Request", "#Request"]
-        for keyword in keywords:
-            if keyword in content:
-                content = content.replace(keyword, "").strip()  # Remove the command keyword to get the actual content
-
-    # Check if the content is valid (at least 3 characters)
-    if len(content) < 3:
-        await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
-        return  # Stop further execution if content is invalid
-
-    # Process the request and send to REQST_CHANNEL or ADMINS
     try:
+        # Check if the message is a reply or a standalone command
+        if message.reply_to_message:
+            # Case 1: If the message is a reply, ensure it has text
+            if message.reply_to_message.text:
+                content = message.reply_to_message.text
+            else:
+                await message.reply_text("<b>The message you're replying to does not contain any text. Please reply to a text message.</b>")
+                return
+        else:
+            # Case 2: If the message is not a reply, get the command's argument (i.e., the text after 'request')
+            content = message.text
+            keywords = ["/request", "#request", "/Request", "#Request"]
+            for keyword in keywords:
+                if keyword in content:
+                    content = content.replace(keyword, "").strip()  # Remove the command keyword to get the actual content
+
+        # Check if the content is valid (at least 3 characters)
+        if len(content) < 3:
+            await message.reply_text("<b>You must type about your request [Minimum 3 Characters]. Requests can't be empty.</b>")
+            return  # Stop further execution if content is invalid
+
+        # Process the request and send to REQST_CHANNEL or ADMINS
         if REQST_CHANNEL is not None:
             # Prepare the button with the message link
             btn = [[
@@ -1172,20 +1173,29 @@ async def requests(bot, message):
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
                 success = True
+
     except Exception as e:
-        await message.reply_text(f"Error: {e}")
+        # If any error occurs, reply with the error and print the stack trace for logging
+        await message.reply_text(f"<b>An error occurred: {str(e)}</b>")
+        import traceback
+        print(f"Error in requests function: {traceback.format_exc()}")  # Print full stack trace for debugging
         return
 
     # If the request was successfully processed, send a confirmation to the user
     if success:
-        link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
-        btn = [[
-            InlineKeyboardButton('Join Channel', url=link.invite_link),
-            InlineKeyboardButton('View Request', url=f"{reported_post.link}")
-        ]]
-        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
-        
-    elif SUPPORT_CHAT_ID == message.chat.id:
+        try:
+            link = await bot.create_chat_invite_link(int(REQST_CHANNEL))
+            btn = [[
+                InlineKeyboardButton('Join Channel', url=link.invite_link),
+                InlineKeyboardButton('View Request', url=f"{reported_post.link}")
+            ]]
+            await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
+        except Exception as e:
+            # Handle any errors while creating the invite link
+            await message.reply_text(f"<b>An error occurred while creating the invite link: {str(e)}</b>")
+            print(f"Error while creating invite link: {traceback.format_exc()}")
+
+  '''  elif SUPPORT_CHAT_ID == message.chat.id:
         chat_id = message.chat.id
         reporter = str(message.from_user.id)
         mention = message.from_user.mention
@@ -1229,7 +1239,7 @@ async def requests(bot, message):
                 InlineKeyboardButton('Join Channel', url=link.invite_link),
                 InlineKeyboardButton('View Request', url=f"{reported_post.link}")
               ]]
-        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))
+        await message.reply_text("<b>Your request has been added! Please wait for some time.\n\nJoin Channel First & View Request</b>", reply_markup=InlineKeyboardMarkup(btn))'''
     
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):
