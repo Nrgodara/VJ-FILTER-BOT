@@ -729,6 +729,29 @@ async def delete(bot, message):
             else:
                 await msg.edit('File not found in database')
 
+@Client.on_message(filters.command('sdelete') & filters.user(ADMINS))
+async def delete_by_size(bot, message):
+    """Delete files from database smaller than specified size"""
+    try:
+        # Extract the size limit from the command arguments (in bytes)
+        size_limit = int(message.command[1])
+    except (IndexError, ValueError):
+        await message.reply("Please provide a valid size in bytes (e.g., /delete_by_size 500000).", quote=True)
+        return
+
+    msg = await message.reply(f"Processing...⏳ Deleting files smaller than {size_limit} bytes", quote=True)
+
+    # Delete all files smaller than the specified size
+    result = await Media.collection.delete_many({
+        'file_size': {'$lt': size_limit}
+    })
+
+    if result.deleted_count:
+        await msg.edit(f'Successfully deleted {result.deleted_count} files smaller than {size_limit} bytes from the database.')
+    else:
+        await msg.edit('No files found smaller than the specified size.')
+        
+
 
 @Client.on_message(filters.command('deleteall') & filters.user(ADMINS))
 async def delete_all_index(bot, message):
