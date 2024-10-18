@@ -16,7 +16,7 @@ async def clone_menu(client, message):
     return await message.reply("**Currently Clone mode is unavailable.**\n\n**May be soon in future...🔜**")
     if CLONE_MODE == False:
         return await message.reply("**Currently Clone mode is unavailable,to avoid load on the server.**\n\n**May be soon in future...🔜**\n\n <blackquote>Anyway if you want your own bot just like me then contact @Mr_MAHIji</blackquote>")
-    '''if await db.is_clone_exist(message.from_user.id):
+    if await db.is_clone_exist(message.from_user.id):
         return await message.reply("**ʏᴏᴜ ʜᴀᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴄʟᴏɴᴇᴅ ᴀ ʙᴏᴛ ᴅᴇʟᴇᴛᴇ ғɪʀsᴛ ɪᴛ ʙʏ /deleteclone**")
     else:
         pass
@@ -68,5 +68,5 @@ async def restart_bots():
             )
             await vj.start()
         except Exception as e:
-            print(f"Error while restarting bot with token {bot_token}: {e}")'''
+            print(f"Error while restarting bot with token {bot_token}: {e}")
         
