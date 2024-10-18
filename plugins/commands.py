@@ -1126,7 +1126,7 @@ async def requests(bot, message):
 
     try:
         # Debugging: Print whether this is a reply or not
-        print(f"Message ID: {message.message_id} - Is this a reply? {'Yes' if message.reply_to_message else 'No'}")
+        print(f"Message ID: {message.id} - Is this a reply? {'Yes' if message.reply_to_message else 'No'}")
 
         # Check if the message is a reply or a standalone command
         if message.reply_to_message:
