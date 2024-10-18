@@ -685,11 +685,11 @@ async def log_file(bot, message):
 
 @Client.on_message(filters.command('delete') & filters.user(ADMINS))
 async def delete(bot, message):
-    reply = message.reply_to_message
-    if reply and reply.media:
+    reply = await bot.ask(message.from_user.id, "Now Send Me Media Which You Want to delete")
+    if reply.media:
         msg = await message.reply("Processing...⏳", quote=True)
     else:
-        await message.reply('Reply to file with /delete which you want to delete', quote=True)
+        await message.reply('Send Me Video, File Or Document.', quote=True)
         return
 
     for file_type in ("document", "video", "audio"):
@@ -729,6 +729,7 @@ async def delete(bot, message):
             else:
                 await msg.edit('File not found in database')
 
+
 @Client.on_message(filters.command('sdelete') & filters.user(ADMINS))
 async def delete_by_size(bot, message):
     """Find files smaller than specified size in MB and ask for confirmation before deletion"""
@@ -753,8 +754,8 @@ async def delete_by_size(bot, message):
         confirmation_message = await msg.edit(
             f'Found {file_count} files smaller than {size_limit_mb} MB. Do you want to proceed with deletion?',
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("Yes, Continue", callback_data=f"confirm_delete_{size_limit_bytes}")],
-                [InlineKeyboardButton("No, Stop", callback_data="cancel_delete")]
+                [InlineKeyboardButton("✅ Continue ✅", callback_data=f"confirm_delete_{size_limit_bytes}")],
+                [InlineKeyboardButton(" 🚫 Stop 🚫", callback_data="cancel_delete")]
             ])
         )
     
