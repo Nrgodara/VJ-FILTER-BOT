@@ -731,26 +731,44 @@ async def delete(bot, message):
 
 @Client.on_message(filters.command('sdelete') & filters.user(ADMINS))
 async def delete_by_size(bot, message):
-    """Delete files from database smaller than specified size"""
+    """Find files smaller than specified size in MB and ask for confirmation before deletion"""
     try:
-        # Extract the size limit from the command arguments (in bytes)
-        size_limit = int(message.command[1])
-    except (IndexError, ValueError):
-        await message.reply("Please provide a valid size in bytes (e.g., /delete_by_size 500000).", quote=True)
-        return
-
-    msg = await message.reply(f"Processing...⏳ Deleting files smaller than {size_limit} bytes", quote=True)
-
-    # Delete all files smaller than the specified size
-    result = await Media.collection.delete_many({
-        'file_size': {'$lt': size_limit}
-    })
-
-    if result.deleted_count:
-        await msg.edit(f'Successfully deleted {result.deleted_count} files smaller than {size_limit} bytes from the database.')
-    else:
-        await msg.edit('No files found smaller than the specified size.')
+        # Extract the size limit from the command arguments (in MB)
+        size_limit_mb = int(message.command[1])
+        # Convert MB to bytes
+        size_limit_bytes = size_limit_mb * 1024 * 1024
         
+        msg = await message.reply(f"Processing...⏳ Searching for files smaller than {size_limit_mb} MB", quote=True)
+
+        # Count files smaller than the specified size in bytes
+        file_count = await Media.collection.count_documents({
+            'file_size': {'$lt': size_limit_bytes}
+        })
+
+        if file_count == 0:
+            await msg.edit(f'No files found smaller than {size_limit_mb} MB.')
+            return
+
+        # Ask for confirmation with inline buttons
+        confirmation_message = await msg.edit(
+            f'Found {file_count} files smaller than {size_limit_mb} MB. Do you want to proceed with deletion?',
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Yes, Continue", callback_data=f"confirm_delete_{size_limit_bytes}")],
+                [InlineKeyboardButton("No, Stop", callback_data="cancel_delete")]
+            ])
+        )
+    
+    except IndexError:
+        await message.reply("Please provide a valid size in MB (e.g., /sdelete 500).", quote=True)
+    
+    except ValueError:
+        await message.reply("Invalid size format. Make sure to provide a number (e.g., /sdelete 500).", quote=True)
+    
+    except Exception as e:
+        await message.reply(f"An error occurred: {str(e)}", quote=True)
+
+
+
 
 
 @Client.on_message(filters.command('deleteall') & filters.user(ADMINS))
