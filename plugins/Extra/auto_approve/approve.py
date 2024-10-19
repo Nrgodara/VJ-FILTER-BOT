@@ -30,8 +30,8 @@ async def auto_approve(client, message: ChatJoinRequest):
             return 
         data = await db.get_msg_command(ap_user_id)
         
-        if data.split("-", 1)[0] == "VJ":
-            user_id = int(data.split("-", 1)[1])
+        if data.split("_", 1)[0] == "MAHI":
+            user_id = int(data.split("_", 1)[1])
             vj = await referal_add_user(user_id, message.from_user.id)
             if vj and PREMIUM_AND_REFERAL_MODE == True:
                 await client.send_message(message.from_user.id, f"<b>You have joined using the referral link of user with ID {user_id}\n\nSend /start again to use the bot</b>")
